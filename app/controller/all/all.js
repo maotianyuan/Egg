@@ -9,7 +9,7 @@ const { getView } = require('./config/view.js');
 class HomeController extends Controller {
   async index() {
     const { ctx } = this;
-    createFile();
+    // createFile();
     ctx.body = 'i, egg';
   }
 }

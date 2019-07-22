@@ -10,6 +10,7 @@ class HomeController extends Controller {
   async index() {
     const { ctx } = this;
     createFile();
+    // await this.ctx.render('baidu/changgui.tpl');
     ctx.body = 'i, egg';
   }
 }
@@ -40,9 +41,6 @@ function createFile() {
 
   fileRead(path.join(__dirname, 'source'), (sheets, _filename, sheetIndex) => {
     const RATE = '覆盖占比';
-    const TAG = '结果类别';
-    const EXCEL_CITY = '省';
-    const CITY = cityData[_filename].CITY;
     console.log('--------runing------', _filename);
     const positions = sheets.map(sheet => {
       if (sheet) {
@@ -55,29 +53,28 @@ function createFile() {
           lon,
           lat,
           [RATE]: rate,
-          [TAG]: tag,
-          [EXCEL_CITY]: city,
         }) => {
-
-          if (rate && city === CITY) {
-            const _tag = tag === '常访地' ? 'changfang' : 'juzhu';
-            switch (tag) {
-              case '常访地':
-              case '居住地':
-                const arr = result[_tag + 'Data'] = result[_tag + 'Data'] || [];
-                const _arr = rateObj[_tag] = rateObj[_tag] || [];
-                _arr.push(rate);
-                arr.push([ lon, lat, rate ]);
-                break;
-              default:
-                break;
-            }
-          }
+          const _tag = 'changfang';
+          // if (rate && city === CITY) {
+          // const _tag = tag === '公司' ? 'changfang' : 'juzhu';
+          // switch (tag) {
+          // case '公司':
+          // case '居住地':
+          const arr = result[_tag + 'Data'] = result[_tag + 'Data'] || [];
+          const _arr = rateObj[_tag] = rateObj[_tag] || [];
+          _arr.push(rate);
+          arr.push([ lon, lat, rate ]);
+          // break;
+          // default:
+          // break;
+          // }
+          // }
         });
         Object.keys(rateObj).forEach(key => {
           const newArray = Array.from(new Set(rateObj[key]));
           max[`${key}maxValue`] = Math.max(...newArray);
         });
+
         return Object.assign(result, max, originObj4s, {
           radius: 20,
           pointer: cityData[_filename],
@@ -89,7 +86,6 @@ function createFile() {
     const filePathHtml = path.join(__dirname, 'html', cityData[_filename].name + '.html');
 
     const content = `var originObj = ${JSON.stringify(positions[sheetIndex])}`;
-
     const contentHtml = getView(cityData[_filename].filename + '.js');
 
     fs.writeFile(filePath, content, () => {

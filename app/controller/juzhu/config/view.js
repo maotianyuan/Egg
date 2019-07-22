@@ -55,12 +55,9 @@ function getView(FILE_NAME) {
         <div id="container">
         </div>
         <div id="r-result">
-            <input type="button" onclick="juzhuMap();" value="居住地" />
-            <input type="number"  id="maxValueJuzhu"></input>
-            <input type="button" onclick="changeMaxValueJuzhu()" value="调整居住参考值"></input><br/>
-            <input type="button" onclick="changfangMap();" value="常访地" />
             <input type="number"  id="maxValueChangfang"></input>
-            <input type="button" onclick="changeMaxValueChangfang()" value="调整常访参考值"></input>
+            <span>最大值<b id="maxValueCompanyB"><b/></span>
+            <input type="button" onclick="changeMaxValueChangfang()" value="调整热力图权重"></input>
             <input type="button" onclick="getPointer();" value="" id="cityValue" />
         </div>
     </body>
@@ -120,8 +117,8 @@ function getView(FILE_NAME) {
         });
     }
     function changeMaxValueChangfang (argument) {
-     document.querySelector("#titlePage").innerText = pointer.name+'-常访地'
-        document.querySelector("#pageTopTitle").innerText = pointer.name+'-常访地'
+     document.querySelector("#titlePage").innerText = pointer.name
+        document.querySelector("#pageTopTitle").innerText = pointer.name
         var num = document.querySelector("#maxValueChangfang").value;
         heatmapOverlay.setDataSet({
         data: getPointes(changfangHeatMap),
@@ -129,13 +126,12 @@ function getView(FILE_NAME) {
         });
     }
     
-    document.querySelector("#maxValueJuzhu").value = juzhuMax
     document.querySelector("#maxValueChangfang").value = changfangMax
+    document.querySelector("#maxValueCompanyB").innerText = changfangMax
     
     function changfangMap(){
-        document.querySelector("#titlePage").innerText = pointer.name+'-常访地'
-        document.querySelector("#pageTopTitle").innerText = pointer.name+'-常访地'
-        // document.getElementById("titlePage").innerText = '常访地'
+        document.querySelector("#titlePage").innerText = pointer.name
+        document.querySelector("#pageTopTitle").innerText = pointer.name
         var _changfang = getPointes(changfangHeatMap)
         heatmapOverlay.setDataSet({
             data: _changfang,
@@ -214,8 +210,8 @@ function getView(FILE_NAME) {
     window.onload=function(){
          changfangMap()
          document.querySelector("#cityValue").value = pointer.name
-         document.querySelector("#titlePage").innerText = pointer.name+'-常访地'
-         document.querySelector("#pageTopTitle").innerText = pointer.name+'-常访地'
+         document.querySelector("#titlePage").innerText = pointer.name
+         document.querySelector("#pageTopTitle").innerText = pointer.name
     }
     </script>
     `;

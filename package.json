@@ -8,11 +8,13 @@
   },
   "dependencies": {
     "egg": "^2.15.1",
-    "egg-scripts": "^2.11.0"
+    "egg-scripts": "^2.11.0",
+    "egg-view-nunjucks": "^2.2.0"
   },
   "devDependencies": {
     "autod": "^3.0.1",
     "autod-egg": "^1.1.0",
+    "compressing": "^1.4.0",
     "egg-bin": "^4.13.1",
     "egg-ci": "^1.11.0",
     "egg-mock": "^3.21.0",
