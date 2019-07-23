@@ -12,7 +12,9 @@ module.exports = app => {
   router.get('/renderHeatMap', controller.heatMap.store.index.index);
   router.get('/downloadFile', controller.heatMap.store.index.downTemplateFile);
 
-  router.get('/renderHeatMapPosition', controller.heatMap.position.index.index);
+  router.get('/renderHeatMapPositionExcel', controller.heatMap.position.index.index); // excel所有城市列
+  router.get('/renderHeatMapPositionExcelSelf', controller.heatMap.position.index.indexSelfProvince); // excel本省份列
+  router.get('/renderHeatMapPositionJSON', controller.heatMap.position.index.getJSON);
 
   router.get('/juzhu', controller.juzhu.juzhu.index);
 };
