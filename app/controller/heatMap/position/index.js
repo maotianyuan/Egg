@@ -29,8 +29,8 @@ class PositionController extends Controller {
   }
   async indexSelfProvince() {
     const { ctx } = this;
-    console.log(ctx);
-    this.mapType = 'amap';
+    const { type = '' } = this.ctx.query;
+    this.mapType = type;
     const rows = await getFiles(path.join(__dirname, `../../../public/excel/${PAGE_TAG}`), true);
     await setFileJS.call(this, rows);
     await setFileHTML.call(this, rows);
@@ -90,8 +90,8 @@ function getPosition({ sheet, fileName }, self) {
   if (self) {
     console.log('------本省-----');
     sheetJson.forEach(({
-      lon,
-      lat,
+      gdlon: lon,
+      gdlat: lat,
       [TYPE]: type,
       [RATE]: rate,
       [PROVINCE]: province,
@@ -106,11 +106,10 @@ function getPosition({ sheet, fileName }, self) {
   } else {
     console.log('------所有-----');
     sheetJson.forEach(({
-      lon,
-      lat,
+      gdlon: lon,
+      gdlat: lat,
       [TYPE]: type,
       [RATE]: rate,
-      [PROVINCE]: province,
     }) => {
       const tempHeatMapArr = heatMap[type] = heatMap[type] || [];
       const tempHeatRateArr = rateObj[type] = rateObj[type] || [];
@@ -137,8 +136,8 @@ function getPointer({ sheet, icon }) {
   const pointer = [];
   const NAME = '店名';
   sheetJson.forEach(({
-    lon,
-    lat,
+    gdlon: lon,
+    gdlat: lat,
     [NAME]: name,
   }) => {
     pointer.push([ lon, lat, name ]);

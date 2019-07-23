@@ -191,7 +191,7 @@ var ObjeHandler = {
       let pointerA = originObj[1]
       let pointerB = originObj[2] || []
       let big = this.addPointer(pointerA.pointer || [], pointerA.icon, 32, true)
-      let small = this.addPointer(pointerB.pointer || [], pointerB.icon, 16)
+      let small = this.addPointer(pointerB.pointer || [], pointerB.icon, 16, true)
       this.markerGroup = [...big, ...small]
     },
     addPointer(data, icon, size, action) {
