@@ -16,4 +16,6 @@ module.exports = app => {
   router.get('/renderHeatMapPositionExcelSelf', controller.heatMap.position.index.indexSelfProvince); // excel本省份列
   router.get('/renderHeatMapPositionJSON', controller.heatMap.position.index.getJSON); // 值返回json数据
 
+  router.get('/path/getJSON', controller.path.index.getJSON);
+
 };
