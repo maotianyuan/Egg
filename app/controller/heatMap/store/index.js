@@ -4,10 +4,13 @@ const fs = require('fs').promises;
 const path = require('path');
 const xlsx = require('xlsx');
 const compressing = require('compressing');
-const { getView } = require('../../../view/heatMap/store');
+const { getView } = require('../../../view/heatMap/store/store');
+const { getViewAmap } = require('../../../view/heatMap/store/store-amap');
 class HomeController extends Controller {
   async index() {
     const { ctx } = this;
+    const { type = '' } = this.ctx.query;
+    this.mapType = type;
     const rows = await getFiles(path.join(__dirname, '../../../public/excel/store'));
     await setFileJS.call(this, rows);
     await setFileHTML.call(this, rows);
@@ -71,7 +74,9 @@ function getData({ sheets, sheetsName, fileName }) {
       }) => {
         const _arr = heatMap[dianpu] = heatMap[dianpu] || {};
         const arr = heatMap[dianpu][level] = heatMap[dianpu][level] || [];
-        arr.push([ lon, lat, 1 ]);
+        if (lon && lat) {
+          arr.push([ lon, lat, 1 ]);
+        }
       });
       return Object.assign({
         radius: 20,
@@ -100,7 +105,12 @@ async function setFileHTML(data) {
     const dir = this.app.config.static.dir + '/heatMap/store';
     const fileNameExcel = item[0].fileName.split('.xlsx')[0];
     const fileNameHtml = path.join(dir, fileNameExcel, `${fileNameExcel}_${index}.html`);
-    const content = getView(`heatMapData_${index}`);
+    let content = '';
+    if (this.mapType === 'amap') {
+      content = getViewAmap(`heatMapData_${index}`);
+    } else {
+      content = getView(`heatMapData_${index}`);
+    }
     await fs.mkdir(path.join(dir, fileNameExcel), { recursive: true });
     await fs.writeFile(fileNameHtml, content, res => {
       console.log(res, '------write---html---success----');
