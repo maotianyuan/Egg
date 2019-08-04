@@ -16,6 +16,16 @@ module.exports = app => {
   router.get('/renderHeatMapPositionExcelSelf', controller.heatMap.position.index.indexSelfProvince); // excel本省份列
   router.get('/renderHeatMapPositionJSON', controller.heatMap.position.index.getJSON); // 值返回json数据
 
+  // 路线派化-生成网页json
   router.get('/path/getJSON', controller.path.index.getJSON);
+  // 路线派化-生成文件
+  router.get('/path/createPath', controller.path.index.createPath);
+  // 路线派化-生成文件并且下载压缩文件
+  router.get('/path/createPathDown', controller.path.index.createPathDown);
+  // 路线派化-下载模版文件
+  router.get('/path/downTemplateFile', controller.path.index.downTemplateFile);
+
+  // 居住常访
+  router.get('/position/normal/renderHeatMapExcel', controller.heatMap.position.normal.index);
 
 };
