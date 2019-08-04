@@ -142,7 +142,7 @@ var ObjeHandler = {
         document.querySelector("#pageTopTitle").innerText = name
     },
     setMap (type, value) {
-       var heatMapData = originObj[0]
+       var heatMapData = EXTRA_DATA[0]
        var max = value || heatMapData.max[type]
         heatmapOverlay.setDataSet({
             data: this.getPointes(heatMapData.heatMap[type]),
@@ -189,7 +189,7 @@ var ObjeHandler = {
     },
     createIpt () {
         var btnStr = '', maxStr = '';
-        var heatMapData = originObj[0]
+        var heatMapData = EXTRA_DATA[0]
         var city = heatMapData.city
         var max = heatMapData.max
         Object.keys(heatMapData.heatMap).map(item => {
@@ -198,8 +198,8 @@ var ObjeHandler = {
         $('#inputWrap').append(btnStr);
     },
     creatPointer () {
-      let pointerA = originObj[1]
-      let pointerB = originObj[2] || []
+      let pointerA = EXTRA_DATA[1]
+      let pointerB = EXTRA_DATA[2] || []
       let big = this.addPointer(pointerA.pointer || [], pointerA.icon, 32, true)
       let small = this.addPointer(pointerB.pointer || [], pointerB.icon, 16, true)
       this.markerGroup = [...big, ...small]

@@ -1,81 +1,97 @@
 'use strict';
 const Controller = require('egg').Controller;
-const fs = require('fs').promises;
-const path = require('path');
 const xlsx = require('xlsx');
-const compressing = require('compressing');
 const { getView } = require('../../../view/heatMap/position/position-has-pointer');
 const { getViewAmap3D } = require('../../../view/heatMap/position/position-has-pointer-amap-3d');
 const { getViewAmap } = require('../../../view/heatMap/position/position-has-pointer-amap');
-const { blue, pink } = require('./pointer/icon');
-const PAGE_TAG = 'position';
+const { HEAMP_MARKER_ICON } = require('../../../lib/utils');
+const PAGE_TAG = 'heatMap';
+const TYPE = 'position';
+const isSelfProvince = false; // 是否只获取本省内Excel数据，默认全部
 
 class PositionController extends Controller {
-  async index() {
+  /**
+   * 生成文件
+   */
+  async createPath() {
     const { ctx } = this;
     const { type = '' } = this.ctx.query;
-    this.mapType = type;
-    const rows = await getFiles(path.join(__dirname, `../../../public/excel/${PAGE_TAG}`));
-    await setFileJS.call(this, rows);
-    await setFileHTML.call(this, rows);
-    console.log('---created--ok-----');
-    const readFilePath = this.app.config.static.dir + `/heatMap/${PAGE_TAG}`;
-    const fileName = '位置信息';
-    await compressing.zip.compressDir(path.join(readFilePath), path.join(readFilePath, '../', `${fileName}.zip`));
-    const filePath = path.resolve(readFilePath, '../', `${fileName}.zip`);
-    const content = await this.service.index.readFileDel({ ctx, fileName: `${fileName}.zip`, filePath });
+    let handlerFormatFun = getView;
+    if (type === 'amap') {
+      handlerFormatFun = getViewAmap();
+    } else if (this.mapType === 'amap3D') {
+      handlerFormatFun = getViewAmap3D();
+    }
+    const data = await this.service.excel.getExcelsData({ folderName: PAGE_TAG, type: TYPE, handlerFormat: this.formatData }); // 获取PAGE_TAG文件夹下，所有Excel格式化后数据
+    await this.service.fileAsync.writeFilesHTML({ data, folderName: PAGE_TAG, type: TYPE, templateView: handlerFormatFun }); // 生成对应html文件
+    await this.service.fileAsync.writeFilesJS({ data, folderName: PAGE_TAG, type: TYPE }); // 生成js文件
+    ctx.body = 'success';
+    ctx.status = 200;
+  }
+  /**
+   * 生成文件并且下载压缩文件 @TODO 出错
+   */
+  async createPathDown() {
+    const { ctx } = this;
+    const { type = '' } = this.ctx.query;
+    let handlerFormatFun = getView;
+    if (type === 'amap') {
+      handlerFormatFun = getViewAmap();
+    } else if (this.mapType === 'amap3D') {
+      handlerFormatFun = getViewAmap3D();
+    }
+    const data = await this.service.excel.getExcelsData({ folderName: PAGE_TAG, type: TYPE, handlerFormat: this.formatData }); // 获取PAGE_TAG文件夹下，所有Excel格式化后数据
+    console.log('--------write---html----begin-----');
+    await this.service.fileAsync.writeFilesHTML({ data, folderName: PAGE_TAG, type: TYPE, templateView: handlerFormatFun }); // 生成对应html文件
+    console.log('--------write---js----begin-----');
+    await this.service.fileAsync.writeFilesJS({ data, folderName: PAGE_TAG, type: TYPE }); // 生成js文件
+    ctx.body = 'test';
+    ctx.status = 200;
+  }
+  /**
+   * 压缩文件
+   */
+  async compress() {
+    const { ctx } = this;
+    const content = await this.service.file.compressDir({ ctx, folderName: PAGE_TAG, type: TYPE, isDel: true }); // 压缩文件后将文件返回给服务器,并删除目标文件和压缩文件
     ctx.body = content;
     ctx.status = 200;
   }
-  async indexSelfProvince() {
-    const { ctx } = this;
-    const { type = '' } = this.ctx.query;
-    this.mapType = type;
-    const rows = await getFiles(path.join(__dirname, `../../../public/excel/${PAGE_TAG}`), true);
-    await setFileJS.call(this, rows);
-    await setFileHTML.call(this, rows);
-    console.log('---created--ok-----');
-    const readFilePath = this.app.config.static.dir + `/heatMap/${PAGE_TAG}`;
-    const fileName = '位置信息-本省';
-    await compressing.zip.compressDir(path.join(readFilePath), path.join(readFilePath, '../', `${fileName}.zip`));
-    const filePath = path.resolve(readFilePath, '../', `${fileName}.zip`);
-    const content = await this.service.index.readFileDel({ ctx, fileName: `${fileName}.zip`, filePath });
-    ctx.body = content;
-    ctx.status = 200;
-  }
+  /**
+   * 生成网页json
+   */
   async getJSON() {
     const { ctx } = this;
-    const rows = await getFiles(path.join(__dirname, `../../../public/excel/${PAGE_TAG}`));
+    const data = await this.service.excel.getExcelsData({ folderName: PAGE_TAG, type: TYPE, handlerFormat: this.formatData }); // 获取PAGE_TAG文件夹下，所有Excel格式化后数据const rows = await this.service.excel.getExcelsData({ folderName: PAGE_TAG, handlerFormat: this.formatData });
     ctx.body = {
       code: 200,
-      rows,
+      data,
       success: true,
     };
     ctx.status = 200;
   }
-}
-async function getFiles(filePath, self = false) {
-  const files = await fs.readdir(filePath);
-  const filesExcel = files.reduce((acc, crr) => {
-    return crr.split('.').slice(-1).toString() === 'xlsx'
-      ? acc.concat(getExcel(filePath, crr)) : acc;
-  }, []);
-  const positions = filesExcel.map(item => {
-    return getData(item, self);
-  });
-  return positions;
-}
-function getExcel(filePath, files) {
-  const fileDir = path.join(filePath, files);
-  const workbook = xlsx.readFile(fileDir);
-  const sheets = workbook.SheetNames.map((name, index) => {
-    console.log(`-----------reading-sheet-----------${name}${index}`);
-    return workbook.Sheets[name];
-  });
-  return {
-    sheets,
-    fileName: files,
-  };
+  /**
+   * 下载示例模版文件
+   */
+  async downTemplateFile() {
+    const { ctx } = this;
+    const fileName = '居住常访地-带点.zip';
+    const content = await this.service.file.readTemplateFile({ ctx, folderName: PAGE_TAG, fileName });
+    ctx.body = content;
+    ctx.status = 200;
+  }
+  formatData({ sheets, fileName }) {
+    const positions = sheets.map((sheet, index) => {
+      if (sheet && index === 0) {
+        return getPosition({ sheet, fileName }, isSelfProvince);
+      } else if (sheet && index === 1) {
+        return getPointer({ sheet, icon: HEAMP_MARKER_ICON.blue });
+      } else if (sheet && index === 2) {
+        return getPointer({ sheet, icon: HEAMP_MARKER_ICON.pink });
+      }
+    });
+    return positions;
+  }
 }
 function getPosition({ sheet, fileName }, self) {
   const sheetJson = xlsx.utils.sheet_to_json(sheet);
@@ -145,50 +161,6 @@ function getPointer({ sheet, icon }) {
   return Object.assign({
     pointer,
     icon,
-  });
-}
-function getData({ sheets, fileName }, self) {
-  const positions = sheets.map((sheet, index) => {
-    if (sheet && index === 0) {
-      return getPosition({ sheet, fileName }, self);
-    } else if (sheet && index === 1) {
-      return getPointer({ sheet, icon: blue });
-    } else if (sheet && index === 2) {
-      return getPointer({ sheet, icon: pink });
-    }
-  });
-  return positions;
-}
-async function setFileJS(data) {
-  console.log('----setFileJS------');
-  data.map(async (item, index) => {
-    const dir = this.app.config.static.dir + `/heatMap/${PAGE_TAG}`;
-    const fileNameJS = path.join(dir, `data/heatMapData_${index}.js`);
-    const content = `var originObj = ${JSON.stringify(item)}`;
-    await fs.mkdir(path.join(dir, 'data'), { recursive: true });
-    await fs.writeFile(fileNameJS, content, res => {
-      console.log(res, '------write---js---success----');
-    });
-  });
-}
-async function setFileHTML(data) {
-  console.log('----setFileHTML------');
-  data.map(async (item, index) => {
-    const dir = this.app.config.static.dir + `/heatMap/${PAGE_TAG}`;
-    const fileNameExcel = item[0].fileName.split('.xlsx')[0];
-    const fileNameHtml = path.join(dir, `${fileNameExcel}_${index}.html`);
-    let content = '';
-    if (this.mapType === 'amap') {
-      content = getViewAmap(`heatMapData_${index}`);
-    } else if (this.mapType === 'amap3D') {
-      content = getViewAmap3D(`heatMapData_${index}`);
-    } else {
-      content = getView(`heatMapData_${index}`);
-    }
-    await fs.mkdir(path.join(dir), { recursive: true });
-    await fs.writeFile(fileNameHtml, content, res => {
-      console.log(res, '------write---html---success----');
-    });
   });
 }
 module.exports = PositionController;

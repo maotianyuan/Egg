@@ -1,6 +1,6 @@
 'use strict';
 
-function getViewAmap(FILE_NAME_JS) {
+function getView(FILE_NAME_JS) {
 
   return `<!DOCTYPE html>
   <html>
@@ -121,9 +121,11 @@ var heatmapOpts = {}
 var ObjeHandler = {
     init(){
         this.markerGroup = []
-        this.createIpt()
+        this.createIpt(EXTRA_DATA[0], 0)
+        this.createIpt(EXTRA_DATA[1], 1)
+        this.createIpt(EXTRA_DATA[2], 2)
+        this.createIpt(EXTRA_DATA[3], 3)
         this.initBaiduMap()
-        this.creatPointer()
         this.action()
         $("#inputWrap .ipt:eq(0)").trigger('click')
     },
@@ -131,8 +133,8 @@ var ObjeHandler = {
         document.querySelector("#titlePage").innerText = name
         document.querySelector("#pageTopTitle").innerText = name
     },
-    setMap (type, value) {
-       var heatMapData = EXTRA_DATA[0]
+    setMap (type, value, globalIndex) {
+       var heatMapData = EXTRA_DATA[globalIndex]
        var max = value || heatMapData.max[type]
         heatmapOverlay.setDataSet({
             data: this.getPointes(heatMapData.heatMap[type]),
@@ -157,11 +159,12 @@ var ObjeHandler = {
       $("#inputWrap").on('click', '.ipt', function() {
           var type = $(this).attr('data-type')
           var city = $(this).attr('data-city')
+          var globalIndex = $(this).attr('data-global-index')
           var value = $(this).prev('.max').val()
           $(this).addClass('active').siblings().removeClass('active')
           var name = $(this).val()
           _this.setTitle(name)
-          _this.setMap(type, value)
+          _this.setMap(type, value, globalIndex)
           _this.gotoPointer(city)
       })
        $('#showMarkerBtn').on('click', function(){
@@ -177,43 +180,16 @@ var ObjeHandler = {
           _this.showHeatMap()
       })
     },
-    createIpt () {
+    createIpt (data, globalIndex) {
         var btnStr = '', maxStr = '';
-        var heatMapData = EXTRA_DATA[0]
+        var heatMapData = data
         var city = heatMapData.city
+        var persion = heatMapData.persion
         var max = heatMapData.max
         Object.keys(heatMapData.heatMap).map(item => {
-          btnStr += '<input class="max" type="number" placeholder="'+item+'热力图权重 默认'+max[item]+'"></input><input class="ipt" data-type="'+item+'" data-city="'+city+'" type="button" value="'+city+' - '+item+'"></input></br><span class="section__desc">'+item + '最大值：' + '<b>'+ max[item] + '</b>'+'</span><br/>'
+          btnStr += '<input class="max" type="number" placeholder="'+item+'热力图权重 默认'+max[item]+'"></input><input class="ipt"  data-global-index="'+globalIndex+'"data-type="'+item+'" data-city="'+city+'" type="button" value="'+persion+' - '+item+'"></input></br><span class="section__desc">'+item + '最大值：' + '<b>'+ max[item] + '</b>'+'</span><br/>'
         })
         $('#inputWrap').append(btnStr);
-    },
-    creatPointer () {
-      let pointerA = EXTRA_DATA[1]
-      let pointerB = EXTRA_DATA[2] || []
-      let big = this.addPointer(pointerA.pointer || [], pointerA.icon, 32, true)
-      let small = this.addPointer(pointerB.pointer || [], pointerB.icon, 16, true)
-      this.markerGroup = [...big, ...small]
-    },
-    addPointer(data, icon, size, action) {
-      // var myIcon = new BMap.Icon(icon, new BMap.Size(size, size));
-      var myIcon = new AMap.Icon({
-          size: new AMap.Size(size, size),
-          image: icon,
-      });
-      var pointArray = []
-      let markerGroup = []
-      for(var i=0;i<data.length;i++){
-          var marker = new AMap.Marker({
-              position: new AMap.LngLat(data[i][0],data[i][1]),
-              icon: myIcon,
-              offset: new AMap.Pixel(-13, -30)
-          });
-
-          markerGroup.push(marker)
-          map.add([marker]);    //增加点
-          action === true && this.markerAction(marker, data[i][2])
-      }
-      return markerGroup
     },
     gotoPointer (city) {
         map.setCity(city);
@@ -274,5 +250,5 @@ $(function(){
 }
 
 module.exports = {
-  getViewAmap,
+  getView,
 };
