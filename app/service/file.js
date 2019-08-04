@@ -43,7 +43,6 @@ class FileService extends Service {
     const sourceFolder = path.resolve(this.app.config.static.dir, folderName, EXPORT_FOLDER, type); // 源文件需要压缩的文件
     const fileName = `${type}.zip`;
     const targetZipFile = path.resolve(this.app.config.static.dir, folderName, EXPORT_FOLDER, fileName); // 压缩后文件放置文件目录
-    await setTimeout(() => {}, 200);
     await compressing.zip.compressDir(sourceFolder, targetZipFile);
     ctx.attachment(fileName);
     console.log('--------compress---ok---------');

@@ -94,7 +94,7 @@ var ObjeHandler = {
     },
     setMapALL () {
         let _arr = []
-        originObj.map(item => {
+        EXTRA_DATA.map(item => {
             Object.keys(item.heatMap).map(i => {
                 _arr.push(...item.heatMap[i])
             })
@@ -106,7 +106,7 @@ var ObjeHandler = {
         });
     },
     setMapABCD (index, dianpu) {
-        var mapDataHeatMap = originObj[index].heatMap[dianpu]
+        var mapDataHeatMap = EXTRA_DATA[index].heatMap[dianpu]
         let _arr = []
         Object.keys(mapDataHeatMap).map(item => {
             _arr.push(...mapDataHeatMap[item])
@@ -117,7 +117,7 @@ var ObjeHandler = {
         });
     },
     setMapABC (index, dianpu) {
-        var mapDataHeatMap = originObj[index].heatMap[dianpu]
+        var mapDataHeatMap = EXTRA_DATA[index].heatMap[dianpu]
         let _arr = []
         let isOk = ['A', 'B', 'C']
         Object.keys(mapDataHeatMap).map(item => {
@@ -129,7 +129,7 @@ var ObjeHandler = {
         });
     },
     setMap (index, dianpu, type) {
-        var data = originObj[index].heatMap[dianpu][type]
+        var data = EXTRA_DATA[index].heatMap[dianpu][type]
         heatmapOverlay.setDataSet({
             data: this.getPointes(data),
             max:$('#maxValueJuzhu').val()
@@ -172,7 +172,7 @@ var ObjeHandler = {
     createIpt () {
        var btnStr = '';
         var arr = ['A', 'B', 'C', 'D', 'ABC', 'ABCD']
-        originObj.map((item,index)=>{
+        EXTRA_DATA.map((item,index)=>{
             Object.keys(item.heatMap).map(dianpu => {
               let city = item.city
                 if (Object.keys(item.heatMap[dianpu]).length == 4) {
