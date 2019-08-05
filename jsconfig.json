@@ -1,5 +1,9 @@
 {
-  "include": [
-    "**/*"
-  ]
+  "include": ["**/*"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+     "@/*" : ["./app/*"]
+    }
+  }
 }

@@ -18,9 +18,9 @@ class PositionController extends Controller {
     const { type = '' } = this.ctx.query;
     let handlerFormatFun = getView;
     if (type === 'amap') {
-      handlerFormatFun = getViewAmap();
-    } else if (this.mapType === 'amap3D') {
-      handlerFormatFun = getViewAmap3D();
+      handlerFormatFun = getViewAmap;
+    } else if (type === 'amap3D') {
+      handlerFormatFun = getViewAmap3D;
     }
     const data = await this.service.excel.getExcelsData({ folderName: PAGE_TAG, type: TYPE, handlerFormat: this.formatData }); // 获取PAGE_TAG文件夹下，所有Excel格式化后数据
     await this.service.fileAsync.writeFilesHTML({ data, folderName: PAGE_TAG, type: TYPE, templateView: handlerFormatFun }); // 生成对应html文件
@@ -36,9 +36,9 @@ class PositionController extends Controller {
     const { type = '' } = this.ctx.query;
     let handlerFormatFun = getView;
     if (type === 'amap') {
-      handlerFormatFun = getViewAmap();
-    } else if (this.mapType === 'amap3D') {
-      handlerFormatFun = getViewAmap3D();
+      handlerFormatFun = getViewAmap;
+    } else if (type === 'amap3D') {
+      handlerFormatFun = getViewAmap3D;
     }
     const data = await this.service.excel.getExcelsData({ folderName: PAGE_TAG, type: TYPE, handlerFormat: this.formatData }); // 获取PAGE_TAG文件夹下，所有Excel格式化后数据
     console.log('--------write---html----begin-----');
